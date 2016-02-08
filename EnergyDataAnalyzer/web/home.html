@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>My Home</title>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+ 
+  <style>
+       body { font-size: 62.5%; }
+        .subheading {
+                color:  #3399F2;
+                font-weight: bold;
+                
+            }
+            .subheading2{
+               color: #79798C;
+                font-weight: bold; 
+            }
+        a:link {
+    text-decoration: none;
+}
+#help {
+     padding: 10px;
+    width: 960px;
+    height: 520px;
+}
+#LeftCol
+    {
+        /* Move it to the left */
+        float: left;
+        width: 250px;
+        text-align: center;
+        height: 475px; 
+       
+       
+        /* Move it away from the content */
+        margin-right: 10px;
+
+    /* For visibility. Delete me */
+   //border: 1px solid green;
+    }
+
+    #Photo
+    {
+        /* Width and height of photo container */
+        width: 250px;
+        height: 250px;
+        /* For visibility. Delete me */
+       //border: 1px solid tan;
+    } 
+
+    #PhotoOptions
+    {
+        text-align: center;
+        width: 200px;
+
+    /* For visibility. Delete me */
+    //border: 1px solid brown;
+    }
+
+    #Info
+    {
+        width: 730px;
+        height: 450px; 
+        text-align: center;
+
+        /* Move it to the right */
+        float: right;
+
+    /* For visibility. Delete me */
+    //border: 1px solid blue;
+    }
+
+    #Info strong
+    {
+        /* Give it a width */
+        display: inline-block;
+        width: 200px;
+
+    /* For visibility. Delete me */
+   //border: 1px solid orange;
+    }
+
+    #Info span
+    {
+        /* Give it a width */
+        display: inline-block;
+        width: 480px;
+        height: 60px; 
+
+    /* For visibility. Delete me */
+    //border: 1px solid purple;
+    }
+    
+
+  </style>
+  <script>
+  $(function() {     
+
+    $( "#tabs" ).tabs({
+      beforeLoad: function( event, ui ) {
+        ui.jqXHR.error(function() {
+          ui.panel.html(
+            "Couldn't load this tab. We'll try to fix this as soon as possible. " +
+            "If this wouldn't be a demo." );
+        });
+      }
+    });
+     $('.recent_activity_link').css('cursor', 'hand');
+    var queryString = new Array();
+          if (queryString.length == 0) {
+          
+            if (window.location.search.split('?').length > 1) {
+                var params = window.location.search.split('?')[1].split('&');
+                for (var i = 0; i < params.length; i++) {
+                    var key = params[i].split('=')[0];
+                    var value = decodeURIComponent(params[i].split('=')[1]);
+                    queryString[key] = value;
+                }
+            }
+        }
+        if (queryString["user"] != null ) {
+            var data ="Welcome " + queryString["user"];
+            $("#lblData").html(data);
+            $("#UIDvalueid").val(queryString["user"]);
+            $("#UIDvalueid2").val(queryString["user"]);
+            $("#UIDvalueidf").val(queryString["user"]);
+            $("#UIDtoDelete").val(queryString["user"]);
+            $("#UIDtoupdateProfile").val(queryString["user"]);
+          
+        }
+        
+        //code begins for Recent Activity Jquery :
+        //
+         subclick=0;
+
+        $(".recent_activity_link").click(function() {
+            
+            if(subclick>0)
+            {
+              
+                location.reload();
+            }
+        });
+ 
+             currentUserID=queryString["user"];
+       
+                
+               $.get('http://localhost:8084/Project/RecentActivity',{
+                   user:currentUserID},
+                   function(responseText) { 
+                               $('#getdata').html(responseText);
+                               //alert("data"+responseText);
+                           });
+
+                   $("a").addClass("ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only");
+        
+        //code begins for Profile Page
+        //call to Servlet to authenticate user
+        $.get('http://localhost:8084/Project/RetrieveProfile',{     
+            user:currentUserID},
+            function(responseText) { 
+                      securityarray2=responseText.split("*");
+                      if(securityarray2[0]!="invalid")
+                      {
+                      $("#usernick").val(securityarray2[0]);
+                      $("#usercountry1").val(securityarray2[1]);
+                      $("#userweb").val(securityarray2[2]);
+                      $(' #usercomments').val(securityarray2[3]);
+                      $(' #CurrentImageURL').val(securityarray2[4]);
+                      $('#Photo').attr('src', securityarray2[4]);
+                      }
+                  
+                    });
+       
+                  function readURL(input) 
+                {
+       
+        if (input.files && input.files[0]) {
+                        var reader = new FileReader();
+
+                        reader.onload = function (e) {
+                            $('#Photo').attr('src', e.target.result);
+                        };
+
+                        reader.readAsDataURL(input.files[0]);
+                       
+                    }
+                }
+
+                $("#imgInp").change(function(){
+                    readURL(this);
+               
+                        var imageurl= $("#imgInp").val().split('\\').pop().split('\\').pop();; 
+                        
+                        $("#CurrentImageURL").val(imageurl);
+                });
+         if (!$('#Photo').attr('src')){
+                        $('#Photo').attr('src', "profile_image/signup_male.png");
+                        
+                    }
+                    
+    //                
+    //                
+    //Code to Delete Profile:
+    //
+    //
+      dialog = $( "#Profile-delete-confirmation-form" ).dialog({
+      autoOpen: false,
+      height: 150,
+      width: 250,
+      modal: true,
+      resizable: false,
+      buttons: {
+        "Delete": function () {
+
+                $("form[name='delete_profile']").submit();
+           
+           
+        },
+        Cancel: function() {
+          dialog.dialog( "close" );
+        }
+      },
+      close: function() {
+        
+        
+      }
+    });
+    $( "#deleteUserProfile" ).button().on( "click", function() {
+           // alert("in");
+                    dialog.dialog( "open" );
+                });
+    //
+    //
+    //end of code to Delete Profile
+    //Code ends for Profile Page
+    //
+    //
+            var pictureList = [
+                            'image\\image7.jpeg',
+                           'image\\country1.jpeg',
+                           'image\\country2.jpg',
+                           'image\\country3.jpg',
+                           'image\\country4.jpg',
+                           'image\\country5.jpg',
+                            'image\\image6.jpg',
+                            'image\\image5.bmp',];
+        //image change for 1 country analysis :
+            $("#analyzecountryoption").change(function() {
+                
+                if($("#analyzecountryoption").val()=="none")
+       {
+            val=6;
+            $('#one_country_analysis_image').attr("src",pictureList[val]);
+            
+        }
+        else if ($("#analyzecountryoption").val()=="China")
+       {
+            val=1;
+            $('#one_country_analysis_image').attr("src",pictureList[val]);
+           
+        }
+           else if ($("#analyzecountryoption").val()=="India")
+       {
+            val=2;
+            $('#one_country_analysis_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#analyzecountryoption").val()=="United States")
+       {
+            val=3;
+            $('#one_country_analysis_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#analyzecountryoption").val()=="United Kingdom")
+       {
+            val=4;
+            $('#one_country_analysis_image').attr("src",pictureList[val]);
+            
+        }
+          else if ($("#analyzecountryoption").val()=="Australia")
+       {
+            val=5;
+            $('#one_country_analysis_image').attr("src",pictureList[val]);
+            
+        }
+                
+            });
+        
+        
+      
+        //
+        // code for recent activity ends here
+        //for 2 country analysis country validation
+        //
+        //
+        
+        
+   $( "#country1" ).change(function() {
+
+   selone=$( "#country1" ).val();
+
+       if(selone==$( "#country2" ).val())
+       {
+           alert("Two Countries can't be same");
+           $("#country1").val("none");
+       }
+       
+       //
+       //
+       //
+       //to change picture of country 1 based on drop down selection :
+       //
+
+       if($("#country1").val()=="none")
+       {
+            val=0;
+            $('#country1_image').attr("src",pictureList[val]);
+            
+        }
+        else if ($("#country1").val()=="China")
+       {
+            val=1;
+            $('#country1_image').attr("src",pictureList[val]);
+           
+        }
+           else if ($("#country1").val()=="India")
+       {
+            val=2;
+            $('#country1_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#country1").val()=="United States")
+       {
+            val=3;
+            $('#country1_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#country1").val()=="United Kingdom")
+       {
+            val=4;
+            $('#country1_image').attr("src",pictureList[val]);
+            
+        }
+          else if ($("#country1").val()=="Australia")
+       {
+            val=5;
+            $('#country1_image').attr("src",pictureList[val]);
+            
+        }
+        
+
+ 
+});
+
+   $( "#country2" ).change(function() {    
+  
+   seltwo=$( "#country2" ).val();
+     if(seltwo==$( "#country1" ).val())
+     {
+           alert("Two Countries can't be same");
+           $("#country2").val("none");
+       }
+        //Code to channge image for country 2 
+         if($("#country2").val()=="none")
+       {
+            val=0;
+            $('#country2_image').attr("src",pictureList[val]);
+            
+        }
+        else if ($("#country2").val()=="China")
+       {
+            val=1;
+            $('#country2_image').attr("src",pictureList[val]);
+           
+        }
+           else if ($("#country2").val()=="India")
+       {
+            val=2;
+            $('#country2_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#country2").val()=="United States")
+       {
+            val=3;
+            $('#country2_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#country2").val()=="United Kingdom")
+       {
+            val=4;
+            $('#country2_image').attr("src",pictureList[val]);
+            
+        }
+          else if ($("#country2").val()=="Australia")
+       {
+            val=5;
+            $('#country2_image').attr("src",pictureList[val]);
+            
+        }
+        
+
+});
+        //
+        //
+        //code to change image for forecast of data
+        //
+        //
+      $( "#country_forecast_option" ).change(function() { 
+         if($("#country_forecast_option").val()=="none")
+       {
+            val=7;
+            $('#country2_image').attr("src",pictureList[val]);
+            
+        }
+        else if ($("#country_forecast_option").val()=="China")
+       {
+            val=1;
+            $('#country_forecast_image').attr("src",pictureList[val]);
+           
+        }
+           else if ($("#country_forecast_option").val()=="India")
+       {
+            val=2;
+            $('#country_forecast_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#country_forecast_option").val()=="United States")
+       {
+            val=3;
+            $('#country_forecast_image').attr("src",pictureList[val]);
+            
+        }
+           else if ($("#country_forecast_option").val()=="United Kingdom")
+       {
+            val=4;
+            $('#country_forecast_image').attr("src",pictureList[val]);
+            
+        }
+          else if ($("#country_forecast_option").val()=="Australia")
+       {
+            val=5;
+            $('#country_forecast_image').attr("src",pictureList[val]);
+            
+        }
+        
+
+});
+        
+       
+ //ui effect for help page with accordions
+        $( "#accordion" ).accordion({
+     collapsible: "true",
+      heightStyle: "fill",
+      active:false
+      });
+
+      
+      
+            $("#logout").click(function (){
+            window.location.href = "http://localhost:8084/Project/";
+        });
+  
+  
+  });
+      
+
+  
+  //Validate java script for analyze one country ::
+    function validate()
+  {
+       if((document.getElementById("analyzecountryoption").value == "none") )
+    {
+        alert("Select a Country to Analyze!!");
+        return false;
+    }
+       
+        var checkboxs=document.getElementsByName("param");
+    var okay=false;
+    for(var i=0,l=checkboxs.length;i<l;i++)
+    {
+        if(checkboxs[i].checked)
+        {
+            okay=true;
+        }
+    }
+    if(okay)
+        okay = true;
+    else
+    {
+        alert("Please select atleast one parameter");
+        okay = false;
+    }
+    if(okay==true)
+        subclick++;
+
+    return okay;
+  }
+  
+    function validateprofile()
+    {
+        var usernick = document.forms["ProfileInfo"]["usernickname"].value;
+        var usercountry = document.forms["ProfileInfo"]["usercountry"].value;
+          var f=true;
+
+        if(f==true && ($("#CurrentImageURL").val()=="none") || $("#CurrentImageURL").val()=='')
+        {
+            alert("Choose Profile Picture to Update Profile!");
+            f= false;
+         }
+      
+         
+         if(f==true && (usernick.length==0))
+         {
+             alert("Enter a user nick name");
+             f=false;
+         }
+         if(f==true && (usercountry.length==0))
+         {
+             alert("Enter your country name");
+             f=false;
+         }
+         
+        // alert(f);
+         return f;
+    }
+  
+    function validatetwocountry()
+  {
+    
+    var okay=false;
+    if((document.getElementById("country1").value == "none") || (document.getElementById("country2").value == "none") )
+    {
+        alert("Select two countries to compare!!");
+        return false;
+    }
+    if(document.analyze2countries.param2[0].checked ==true)
+        okay = true;
+    else if(document.analyze2countries.param2[1].checked ==true)
+        okay = true;
+    else if(document.analyze2countries.param2[2].checked ==true)
+        okay = true;
+    else if(document.analyze2countries.param2[3].checked ==true)
+        okay = true;
+    else if(document.analyze2countries.param2[4].checked ==true)
+        okay = true;
+    else if(document.analyze2countries.param2[5].checked ==true)
+        okay = true;
+    else if(document.analyze2countries.param2[6].checked ==true)
+        okay = true;
+    else if(document.analyze2countries.param2[7].checked ==true)
+        okay = true;
+    else
+    {
+        alert("Please select atleast one parameter");
+        okay = false;
+    }
+    if(okay==true)
+        subclick++;
+    return okay;
+}
+  
+  function validateforecast()
+  {
+         if((document.getElementById("country_forecast_option").value == "none") )
+    {
+        alert("Select a Country to Forecast Data!!");
+        return false;
+    }
+        var okay=false;
+    
+    if(document.name1.paramf[0].checked ==true)
+        okay = true;
+    else if(document.name1.paramf[1].checked ==true)
+        okay = true;
+    else if(document.name1.paramf[2].checked ==true)
+        okay = true;
+    else if(document.name1.paramf[3].checked ==true)
+        okay = true;
+    else if(document.name1.paramf[4].checked ==true)
+        okay = true;
+    else if(document.name1.paramf[5].checked ==true)
+        okay = true;
+    else if(document.name1.paramf[6].checked ==true)
+        okay = true;
+    else if(document.name1.paramf[7].checked ==true)
+        okay = true;
+    else
+    {
+        alert("Please select atleast one parameter");
+        okay = false;
+        
+    }
+    if(okay==true)
+        subclick++;
+    return okay;                   
+               
+  }
+  
+  
+  </script>
+</head>
+<body>
+    <button id="logout" style="float:right;width:7%" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">Logout</button>
+    <div id="lblData" style="margin-top: 20px;margin-bottom: 10px;color: green;font-size: medium;font-weight: bold;"></div>
+<div id="tabs">
+  <ul>
+    
+    
+    <li><a href="#RecentActivity" class="recent_activity_link">&nbsp;&nbsp;Recent Activity Log&nbsp;&nbsp;</a></li>  
+    <li><a href="#profile">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Profile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
+    <li><a href="#analyze_a_country">&nbsp;&nbsp;Analyze a Country Data&nbsp;&nbsp;</a></li>
+    <li><a href="#analyze_2_countries">&nbsp;Compare Two Countries Data&nbsp;</a></li>
+    <li><a href="#forecast">&nbsp;&nbsp;&nbsp;Compute Energy Forecast&nbsp;&nbsp;&nbsp;</a></li>
+    <li><a href="#help">&nbsp;&nbsp;&nbsp;&nbspHelp Page &nbsp;&nbsp&nbsp;&nbsp;</a></li>
+  </ul>
+    
+    
+    <div id="RecentActivity">
+        <div id="onecountry">
+            <div> <h2> Recent Graph Generation Activities :</h2></div> 
+<!--           <form name="mailUserDetails" action="http://localhost:8084/Project/MailUserActivity" method="get" target="_blank">
+          
+            <input type = "submit" name="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" value ="E-mail Recent Acitivities"/>
+        </form>-->
+            <div id="getdata">Loading Content...
+                <img src="help_image\block-loading.GIF" height="40px" />
+            </div>
+            
+        </div>
+        
+        
+     
+    </div>
+    
+    <div id="profile">
+     
+        <form name="ProfileInfo" method="post" action="http://localhost:8084/Project/ProfilePageServlet" onsubmit="return validateprofile()">
+       <div id="LeftCol">
+            <div id="PhotoDiv">
+              
+                <img id="Photo" src="profile_image/signup_male.png" alt= "default_img" data-src="#" /> <br />
+                <input type='file' id="imgInp" accept="image/*" />
+              
+                
+        </div>
+
+        </div>
+       <div id="Information" style="margin-bottom:180px">
+           <input type="text" id = "CurrentImageURL" value="none" name="userimageurl" style="display:none" >
+           <input type="text" id="UIDtoupdateProfile" name="UIDToUpdateProfile" style="display:none"/>
+           <p><br><br>
+            <strong>Nick name:&nbsp;&nbsp;</strong>
+        <input type="text" name="usernickname" id="usernick"/>
+        </p> <br>
+        <p>
+            <strong>Country:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>
+            <input type="text" name="usercountry" id="usercountry1"/> 
+        </p><br>
+        <p>
+            <strong>Website:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</strong>
+           <input type="text" name="userwebsite" id="userweb"/> (optional)
+        </p> 
+        
+<!--        <p>
+            <strong>Member Since:</strong>
+            <span>Less than one day</span>
+</p> <br>--><br><br>
+               <strong>Short Bio:&nbsp;&nbsp;&nbsp;</strong>
+<!--            <textarea name="comments" cols="19" rows="3" id="usercomments">
+            </textarea>&nbsp;(optional)<br>-->
+  <input type="text" name="comments" id="usercomments"/> (optional)
+          
+    </div> 
+            <input type="submit" value="Update Profile" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="margin-top: -188px; margin-left: 30px;" />
+           
+        </form>
+        <div id="DeleteButtonForm">
+        <form name="delete_profile" action="http://localhost:8084/Project/DeleteProfile" method="post">
+            <input type="text" id="UIDtoDelete" name="UIDtodelete" style="display:none"/>
+             <input type="button" id="deleteUserProfile" value="Delete Profile" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="margin-top: -214px; margin-left: 173px;" />
+          
+        </form>
+        </div>
+        <div id='Profile-delete-confirmation-form' title='Delete Confirmation'>
+            Are you sure you want to delete your Profile now ?
+        </div>
+    </div>
+    
+    <div id="analyze_a_country">
+                 <h2> Energy Analysis for a Country</h2>
+                <br/>
+                <img id="one_country_analysis_image" src="image\image6.jpg" alt="image6" align="right" width="500" height="400" style="margin-top:-59px"/>
+                <form name="analyze1country" action="http://localhost:8084/Project/Servlet1" method="GET" onsubmit="return validate()" target="_blank">
+                    Select a Country :<select name="countrya" id="analyzecountryoption">
+                <option value="none">Select a Country</option>           
+                <option value="China"> China </option>
+                <option value="India">India </option>
+                <option value="United States">United States </option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="Australia">Australia</option>
+                </select>
+                <br/><br>
+
+                <input id="UIDvalueid" type="text" name="UIDvalue" style="display:none">
+
+                <div class="subheading"> Choose Different Criteria to Generate Graph:</div><br/>
+                <label> Population (Total)</label>
+                <input type = "checkbox" name="param" value="Population (Total)"/>
+                &nbsp;<br/><br/>
+
+                <label> GNI per capita, Atlas method (current US$) </label>
+                <input type ="checkbox" name="param" value="GNI per capita"/>
+                &nbsp;<br/><br/>
+                <label> Mortality rate, under-5 (per 1,000 live births) </label>
+                <input type="checkbox" name="param" value="Mortality rate"/>
+                &nbsp;<br/><br/>
+                <label> Forest area (sq. km)</label>
+                <input type="checkbox" name="param" value="Forest area (sq. km)"/>
+                &nbsp;<br/><br/>
+                <label> Energy use (kg of oil equivalent per capita) </label>
+                <input type ="checkbox" name="param" value="Energy use"/>
+                &nbsp;<br/><br/>
+                <label> CO2 emissions (metric tons per capita) </label>
+                <input type ="checkbox" name="param" value="CO2 emissions"/>
+                &nbsp;<br/><br/>
+                <label> Electric power consumption (kWh per capita)</label>
+                <input type="checkbox" name="param" value="Electric power consumption"/>
+                &nbsp;<br/><br/>
+                <label> GDP (current US$)</label>
+                <input type="checkbox" name="param" value="GDP"/>
+                &nbsp;<br/><br/>
+
+
+                <input type = "submit" name="submit" value ="View Graph in Browser"/>
+                <input type ="submit" name="submit" value="Download Graph as PDF" />
+                </form>
+    </div>
+    
+    <div id="analyze_2_countries">
+           <h2> Energy Comparison Between Two Countries</h2>
+            <br/>
+            <img id="country1_image" src="image\image7.jpeg" alt="country flag" align="right" width="320" height="200" style="margin-top: -21px;"/>
+            <img id="country2_image" src="image\image7.jpeg" alt="country flag" align="right" width="320" height="200" style="margin-top: 0px;margin-left:320px"/>
+            <form name="analyze2countries" action="http://localhost:8084/Project/Servlet2" method="GET" onsubmit="return validatetwocountry()" target="_blank">
+                <br/>
+                 <input id="UIDvalueid2" type="text" name="UIDvalue2" style="display:none">
+               Choose First Country:
+            <select name="country1" id="country1">
+                 <option value="none"> Select One </option>   
+            <option value="China"> China </option>
+            <option value="India">India </option>
+            <option value="United States">United States </option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Australia">Australia</option>
+
+            </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+             Choose Second Country:
+                <select name="country2" id="country2">
+                     <option value="none"> Select One </option>   
+            <option value="China"> China </option>
+            <option value="India">India </option>
+            <option value="United States">United States </option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Australia">Australia</option>
+            </select>
+                <br/>
+                <br/>
+                <br/>
+                <div class="subheading">Choose a Criteria to Generate Graph </div><br><br>
+            <label> Population (Total)</label>
+            <input type = "radio" name="param2" value="Population (Total)"/> <br/>
+            &nbsp;<br/>
+
+            <label> GNI per capita, Atlas method (current US$) </label>
+            <input type ="radio" name="param2" value="GNI per capita"/> <br/>
+            &nbsp;<br/>
+            <label> Mortality rate, under-5 (per 1,000 live births) </label>
+            <input type="radio" name="param2" value="Mortality rate"/><br/>
+            &nbsp;<br/>
+            <label> Forest area (sq. km)</label>
+            <input type="radio" name="param2" value="Forest area (sq. km)"/><br/>
+            &nbsp;<br/>
+            <label> Energy use (kg of oil equivalent per capita) </label>
+            <input type ="radio" name="param2" value="Energy use"/><br/>
+            &nbsp;<br/>
+            <label> CO2 emissions (metric tons per capita) </label>
+            <input type ="radio" name="param2" value="CO2 emissions"/><br/>
+            &nbsp;<br/>
+            <label> Electric power consumption (kWh per capita)</label>
+            <input type="radio" name="param2" value="Electric power consumption"/><br/>
+            &nbsp;<br/>
+            <label> GDP (current US$)</label>
+            <input type="radio" name="param2" value="GDP"/><br/>
+            &nbsp;<br/>
+
+            <br/>
+            <input type = "submit" name="submit" value ="View Graph in Browser"  />
+
+            <input type ="submit" name="submit" value="Download Graph as PDF" />
+            </form>
+    </div>
+    
+    <div id="forecast">
+        <h2> Energy Forecast for a country</h2>
+            <br/>
+            <img id="country_forecast_image" src="image\image5.bmp" alt="country flag" align="right" width="500" height="400" style="margin-top:-59px"/>
+
+            <form name="name1" action="http://localhost:8084/Project/Servlet3" method="GET" onsubmit="return validateforecast()" target="_blank">
+                <br/>
+                <input id="UIDvalueidf" type="text" name="UIDvalue2f" style="display:none">
+               Select a Country
+            <select name="countryf" id="country_forecast_option"> 
+            <option value="none">Select a Country</option>    
+            <option value="China"> China </option>
+            <option value="India">India </option>
+            <option value="United States">United States </option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Australia">Australia</option>
+
+            </select>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                <br/>
+                <br/>
+                <br/>
+                <div class="subheading">Choose a Criteria to Generate Graph </div><br><br>
+            <label> Population (Total)</label>
+            <input type = "radio" name="paramf" value="Population (Total)"/> <br/>
+            &nbsp;<br/>
+
+            <label> GNI per capita, Atlas method (current US$) </label>
+            <input type ="radio" name="paramf" value="GNI per capita"/> <br/>
+            &nbsp;<br/>
+            <label> Mortality rate, under-5 (per 1,000 live births) </label>
+            <input type="radio" name="paramf" value="Mortality rate"/><br/>
+            &nbsp;<br/>
+            <label> Forest area (sq. km)</label>
+            <input type="radio" name="paramf" value="Forest area (sq. km)"/><br/>
+            &nbsp;<br/>
+            <label> Energy use (kg of oil equivalent per capita) </label>
+            <input type ="radio" name="paramf" value="Energy use"/><br/>
+            &nbsp;<br/>
+            <label> CO2 emissions (metric tons per capita) </label>
+            <input type ="radio" name="paramf" value="CO2 emissions"/><br/>
+            &nbsp;<br/>
+            <label> Electric power consumption (kWh per capita)</label>
+            <input type="radio" name="paramf" value="Electric power consumption"/><br/>
+            &nbsp;<br/>
+            <label> GDP (current US$)</label>
+            <input type="radio" name="paramf" value="GDP"/><br/>
+            &nbsp;<br/>
+
+            <br/>
+            <input type = "submit" name="submit" value ="View Graph in Browser" />
+
+            <input type ="submit" name="submit" value="Download Graph as PDF" />
+            </form>
+    </div>
+    
+    <div id="help" >
+    <div id="accordion">
+        <!------------------------------------------------------------------------------------------->
+        <h3>How do I use the System?</h3>
+        <div>
+            
+            <p>For a first time user, you will have to register in our system by clicking on the Sign Up option. Please give your details and remember the security question and its answer.
+            It is important to remember the question as it will would be asked to verify your identity when you forget your password.
+            You will need to enter an ID which is available in our system.
+            Please click on the Check availability before you submit your registration request. If the ID is available, you can proceed ahead with the registration
+            Once you've registered, you can log into the system and use our analyzer services.
+            
+            For returning users, you will have to log in with valid credentials to use the system. </p>
+            <figure>
+                <img src="help_image\welcome page.png" alt="Welcome Page" style="width:550px;height:450px">
+                    <figcaption>Fig1. - The Welcome Page.
+                        The red circle is where the user will sign up.
+                    </figcaption>
+                    </figure>
+            <figure>
+                <img src="help_image\three1.png" alt="Available ID" style="width:550px;height:450px">
+                    <figcaption>Fig2. - The Sign Up Page Part 1.
+                        The red arrow indicates that that user name is available.
+                    </figcaption>
+                    </figure>
+            <figure>
+                <img src="help_image\unavailable UID.png" alt="Unavailable ID" style="width:550px;height:450px">
+                    <figcaption>Fig3. - The Sign Up Page Part 2.
+                        The red arrow indicates that that user name is unavailable.
+                    </figcaption>
+                    </figure>
+        </div>
+        <!------------------------------------------------------------------------------------------->
+        <h3>I forgot my Password. What do I do?</h3>
+        <div>
+            <p> We can reset your password if you forget it. Enter your valid username and enter any password.
+            Registered users will be recognized by the system and the Forgot Password button will be enabled.
+            Click on the forgot password button, enter the answer for your security question.
+            If the answer for the security question is correct, you can reset your password.
+            Once your password has been reset, you can login into the system once again to access the services.</p>
+            <figure>
+                <img src="help_image\invalid-user-name.png" alt="Invalid User Name 1" style="width:550px;height:200px">
+                    <figcaption>Fig4. - The Login Page.
+                        Here, the user has attempted to login with the wrong username/password.
+                        The system could not authenticate that login combination.
+                    </figcaption>
+                    </figure>
+            <figure>
+                <img src="help_image\verify-forgot-password.png" alt="Invalid User Name 2" style="width:550px;height:450px">
+                    <img src="help_image\resetting-password.png" alt="Invalid User Name" style="width:550px;height:450px">
+                        <figcaption>Fig5. - The Forgot Your Password Page.
+                            The user can use the password recovery option to retrieve there password.
+                        </figcaption>
+                        </figure>
+            
+        </div>
+        <!------------------------------------------------------------------------------------------->
+        <h3>How do I view my profile?</h3>
+        <div>
+            <p></p>
+            <figure>
+                <img src="help_image\New-profile-page-without-details.png" alt="Profile" style="width:550px;height:450px">
+                    <figcaption>Fig6. - The Profile Page.
+                        Here, we have a blank profile. The user will be able to edit/delete there profile. When the user is ready to submit the update, they have to make sure all require fields: Name and Country.
+                    </figcaption>
+                    </figure>
+            
+        </div>
+        <!------------------------------------------------------------------------------------------->
+        <h3>What does the Section 'Analyze a Country' do?</h3>
+        <div>
+            <p> This section provides the functionality of providing an analysis of energy consumption for one country based on various arguments provided in the page.
+            This functionality enables us to understand the difference parameters which play an important role in analyzing the energy consumption for a country.
+            It also helps us to estimate which parameter has a greater part in the energy consumption and which parameter does not make a huge difference.
+            Ensure that at least once parameter is selected, else the system would throw an error, asking you to select at least one parameter</p>
+            <figure>
+                <img src="help_image\one-country-analysis.png" alt="One Country" style="width:550px;height:450px">
+                    <figcaption>Fig7. - Analyzing one country.</figcaption>
+                    </figure>
+        </div>
+        
+        <!------------------------------------------------------------------------------------------->
+        <h3>What does the 'Analyze two countries' tab do ?</h3>
+        <div>
+            <p> The 'Analyze Two Countries' tab provides the service of comparing the energy consumption between two countries based on one parameter.
+            This functionality is provided to see which country has a better energy consumption factor. Looking at the graphs generated, one can
+            estimate which country has a better energy consumption.
+            
+            Ensure that the same countries are not chosen. Also, ensure that there is one parameter selected. As of now, we do not provision the system to
+            to compare the energy consumption based on multiple parameters.</p>
+            <figure>
+                <img src="help_image\two-country-analysis.png" alt="Two Countries" style="width:550px;height:450px">
+                    <figcaption>Fig8. - Analyzing two countries.</figcaption>
+                    </figure>
+        </div>
+        <!------------------------------------------------------------------------------------------->
+        <h3>What does the 'Compute Energy Forecast' tab do ?</h3>
+        <div>
+            <p> The 'Compute Energy Forecast' tab provides the service of comparing the energy consumption for the future.
+            This tool will allow users to select a country and forecast the future energy requirements of   that country.
+            The user selects a country from the list of countries in the drop-down menu.
+            Select the country fo your chose, and afterwards, select "View Graph in Broswer" or "Download Graph as a PDF".
+            </p>
+            <figure>
+                <img src="help_image\future-analysis.png" alt="Future" style="width:550px;height:450px">
+                    <figcaption>Fig9. - Computing energy forecast.</figcaption>
+                    </figure>
+        </div>
+        
+        <!------------------------------------------------------------------------------------------->
+        <h3>How do I get back to the system after the graph is generated? </h3>
+        <div>
+            <p> The graphs generated by our systems are images. Therefore, you will have to press the back button on your browser to get back to the previous page.
+            If you accidentally logout of the system, you will have to login once again to utilize the services of our site.</p>
+            <figure>
+                <img src="help_image\back-arrow.png" alt="Back Arrow" style="width:550px;height:450px">
+                    <figcaption>Fig10. - Click browser's back arrow'.</figcaption>
+                    </figure>
+            
+        </div>
+        
+        <!------------------------------------------------------------------------------------------->
+        <h3>How do I display recent activity?</h3>
+        <div>
+            <p>Users have options of reviewing all recent activities done on the site. They will see the date, time, and activity.</p>
+            <figure>
+                <img src="help_image\recent-activities.png" alt="Recent" style="width:550px;height:450px">
+                    <figcaption>Fig11. - The Recent Activity Page.
+                        Here, the user view all recent activity.
+                    </figcaption>
+                    </figure>
+        </div>
+        <!------------------------------------------------------------------------------------------->
+        <h3>How do I logout of the system?</h3>
+        <div>
+            <p> Once you sign in, the top right corner has a logout button which logs the user out of the system and takes him/her back to the home page.</p>
+            <figure>
+                <img src="help_image\logout.png" alt="Logout" style="width:550px;height:450px">
+                    <figcaption>Fig12. - How to Logout.
+                        Click logout button.
+                    </figcaption>
+                    </figure>
+            
+        </div>
+        <!------------------------------------------------------------------------------------------->
+        
+    </div>
+</div>
+
+    
+</div> 
+ 
+ 
+</body>
+
+</html>

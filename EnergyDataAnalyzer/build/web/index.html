@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Energy Data Analyzer</title>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+  <script src="jquery.bxslider/jquery.bxslider.min.js" type="text/javascript"></script>
+        <link href="jquery.bxslider/jquery.bxslider.css" rel="stylesheet" type="text/css"/>
+  <style>
+    body { font-size: 62.5%; }
+    div#SlideShow { width:48%;}
+   
+    label, input { display:block; }
+    input.text { margin-bottom:12px; width:95%; padding: .4em; }
+    fieldset { padding:0; border:0; margin-top:25px; }
+    h1 { font-size: 1.2em; margin: .6em 0; }
+    div#users-contain { width: 350px; margin: 20px 0; }
+     .input-disabled {
+                     background:#E7E7EF;
+                     cursor:not-allowed;
+                     }
+/*        div#loading {
+    position: absolute;
+    left: 150px;
+    top: 120px;
+    z-index: +1;
+}*/
+    .ui-dialog .ui-state-error { padding: .3em; }
+    .validateTips { border: 1px solid transparent; padding: 0.3em; }
+  </style>
+  <script>
+     
+  $(function() {
+      // $("#loading").hide();
+      $('#checkUIDbox').text("");
+          $('.bxslider').bxSlider({         //Code to display image slideshow
+                          auto: true,
+                          autoControls: true,
+                          mode: 'horizontal'
+
+                        });
+      
+    var dialog, form,
+ 
+      
+      emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
+      fname = $( "#fname" ),
+      lname = $( "#lname" ),
+      name = $( "#name" ),
+      email = $( "#email" ),
+      password = $( "#password" ),
+      secque=$("#secque"),
+      secans=$("#secans"),
+      allFields = $( [] ).add( fname ).add( lname ).add( name ).add( email ).add( password ).add(secque).add(secans),
+      tips = $( ".validateTips" );
+ 
+    function updateTips( t ) {
+      tips
+        .text( t )
+        .addClass( "ui-state-highlight" );
+      setTimeout(function() {
+        tips.removeClass( "ui-state-highlight", 1500 );
+      }, 500 );
+    }
+ 
+    function checkLength( o, n, min, max ) {
+      if ( o.val().length > max || o.val().length < min ) {
+        o.addClass( "ui-state-error" );
+        updateTips( "Length of " + n + " must be between " +
+          min + " and " + max + "." );
+        return false;
+      } else {
+        return true;
+      }
+    }
+ 
+    function checkRegexp( o, regexp, n ) {
+      if ( !( regexp.test( o.val() ) ) ) {
+        o.addClass( "ui-state-error" );
+        updateTips( n );
+        return false;
+      } else {
+        return true;
+      }
+    }
+ 
+    function addUser() {
+      var valid = true;
+      allFields.removeClass( "ui-state-error" );
+ 
+      valid = valid && checkLength( fname, "First Name", 3, 16 );
+      valid = valid && checkLength( lname, "Last Name", 3, 16 );
+      
+      valid = valid && checkLength( name, "username", 3, 16 );
+      valid = valid && checkLength( email, "email", 6, 80 );
+      valid = valid && checkLength( password, "password", 5, 16 );
+      
+      valid = valid && checkLength( secque, "Security Question", 10, 100 );
+      valid = valid && checkLength( secans, "Security Answer", 5, 50 );
+      
+      valid = valid && checkRegexp( fname, /^([0-9a-zA-Z])+$/, "First Name field only allow : a-z 0-9" );
+      valid = valid && checkRegexp( lname, /^([0-9a-zA-Z])+$/, "Last Name field only allow : a-z 0-9" );
+      
+      valid = valid && checkRegexp( name, /^[a-z]([0-9a-z_\s])+$/i, "Username may consist of a-z, 0-9, underscores, spaces and must begin with a letter." );
+      valid = valid && checkRegexp( email, emailRegex, "Incorrect email id format : john@uic.com" );
+      valid = valid && checkRegexp( password, /^([0-9a-zA-Z])+$/, "Password field only allow : a-z 0-9" );
+      
+      return valid;
+    }
+// function userCheck()
+// { 
+//       currentUserID=$.trim($("#name").val());
+//        if(currentUserID.length >3)
+//        {
+//        $.get('http://localhost:8084/Project/CheckUID',{
+//            user:currentUserID},
+//            function(responseText) { 
+//                            
+//                        $('#checkUIDbox').text(responseText);
+//                    });
+//                
+//        }        
+//     if($("#checkUIDbox").text()=="true")
+//         return true;
+//     else if ($("#checkUIDbox").text()=="false")
+//     {
+//         //alert("User Name already exists!!Please select different User Name!!")
+//         return false;
+//     }
+//     
+// }
+    dialog = $( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 535,
+      width: 350,
+      modal: true,
+      resizable: false,
+      buttons: {
+        "Create an account": function () {
+
+
+               var b=$('#checkUIDbox').text();
+
+            if(addUser() && b=="Available")
+            {
+                dialog.find( "form" ).submit();
+            }
+            else if (b=="Unavailable")
+            {
+                alert("Please Select a different User ID!");
+            }
+            else if(b=="")
+            {
+                alert("Select a User ID and Check availability!")
+            }
+           
+        },
+        Cancel: function() {
+          dialog.dialog( "close" );
+        }
+      },
+      close: function() {
+        form[ 0 ].reset();
+        allFields.removeClass( "ui-state-error" );
+        $('#checkUIDbox').css("color","white");
+        $('#checkUIDbox').text("");
+        $('#name').removeClass("input-disabled");
+      }
+    });
+ 
+    form = dialog.find( "form" ).on( "submit", function( event ) {
+//      event.preventDefault();
+      addUser();
+    });
+ 
+    $( "#create-user" ).button().on( "click", function() {
+      dialog.dialog( "open" );
+    });
+    
+    $("#checkavail").click(function (){
+        //  $("#loading").show();
+         currentUserID=$.trim($("#name").val());
+         if(currentUserID.length>=3)
+         {
+            // $("#loading").show();
+        $.get('http://localhost:8084/Project/CheckUID',{     //call to Servlet to authenticate user
+            user:currentUserID},
+            function(responseText) { 
+                        if(responseText=="true")
+                        {
+                            $('#checkUIDbox').text("Available").css('color,green');
+                            $('#checkUIDbox').css({color:'green'});
+                            
+                               $('#name').attr("readonly", true);
+                                $('#name').addClass("input-disabled")
+                        //    $("#loading").hide();
+                            
+                        }
+                        else if (responseText=="false")
+                        {
+                            $('#checkUIDbox').text("Unavailable");    
+                            $('#checkUIDbox').css({color:'red'});
+                          //  $("#loading").hide();
+                        }
+                    });
+                    
+                    
+          }
+          else
+              //alert("User ID should be more than 3 Characters");
+                $('#checkUIDbox').text("ID min lenght:3");
+          //  $("#loading").hide();
+    });
+
+
+  });  
+  function validate()
+  {
+        var user = document.forms["LogForm"]["eUserID"].value;
+        var pass = document.forms["LogForm"]["epassword"].value;           
+//       var re = /^[a-z0-9_]+$/i.test(user);
+//        alert("Reg Ex:"+re);
+        var flag=true;
+       // alert("user:"+user+"pass"+pass);
+    if (user == null || user == "") {
+        alert("Enter User ID to Log in");
+        //return false;
+        flag=false;
+    }
+    if (flag==true && (pass == null || pass == "")) {
+        alert("Enter Password to Log in");
+        flag=false;
+    }
+          
+        if(flag==true)
+        {
+            if(flag==true&& /^[a-z0-9_]+$/i.test(user))
+            {
+             flag=true;   
+            }
+            else
+            {
+                alert("Only alphabets and numbers allowed in User ID!!");
+                 flag=false;
+            }
+        }
+      return flag;
+  
+                
+  }
+  
+  </script>
+</head>
+<body>
+         <div align="center" id="heading" style="font-size:20px;font-family:calibri;font-face:bold">
+             <br> Energy Data Analyzer <br><br><br>
+        </div>
+    
+        <div id ="LoginDiv" style="float:right;width:12%;margin-right:67px">
+            <form name="LogForm" id="LoginForm" action="http://localhost:8084/Project/LoginServlet" method="GET" onsubmit="return validate()">
+                <label for="ExistingUserName">User ID</label>
+                <input type="text" name="eUserID" id="euserID" maxlength="16" class="ui-widget-content ui-corner-all">
+                <label for="Existingpassword">Enter Password</label>
+                <input type="password" name="epassword" id="epassword"  class="ui-widget-content ui-corner-all">
+                <input value="Login" type="submit" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only">  
+                </form>
+            <br>
+            New User ? Sign Up Now<br><br>
+            <button id="create-user">Sign Up</button>
+         </div>
+ 
+    <div id="SlideShow" style="margin-left: 235px;margin-top: 5px;">
+
+         <ul class="bxslider">
+
+          <li><img src="Slide_Images\image0.jpg" height="330" width="780" title="Image One"/></li>
+          <li><img src="Slide_Images\image1.jpg" height="330" width="780" title="Image Two"/></li>
+          <li><img src="Slide_Images\image2.jpg" height="330" width="780" title="Image Three"/></li>
+          <li><img src="Slide_Images\image3.jpg" height="330" width="780" title="Image Four"/></li>
+          <li><img src="Slide_Images\image4.jpg" height="330" width="780" title="Image Five"/></li>
+        
+        </ul>
+        </div>
+
+<div id="dialog-form" title="New User Registration" >
+
+  <p class="validateTips">All form fields are required.</p>
+ 
+  <form name="userform" action="http://localhost:8084/Project/RegistrationServlet" method="GET">
+    <fieldset>
+      <label for="name">First Name</label>
+      <input type="text" name="fname" id="fname" value="" class="text ui-widget-content ui-corner-all">
+      <label for="name">Last Name</label>
+      <input type="text" name="lname" id="lname" value="" class="text ui-widget-content ui-corner-all">
+      <label for="name" >User ID</label>
+      <input type="text" name="name" id="name" value="" maxlength="15" class="text ui-widget-content ui-corner-all" style="width:35%">
+      <input type="button" value="Check Availablity" name="checkavail" id="checkavail" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" style="width: 38%; margin-left: 120px;margin-top: -65px;">
+      <b><label id="checkUIDbox" style="color:orange;margin-left: 248px;margin-bottom: 12px;margin-top: -41px;">&nbsp;&nbsp;&nbsp;&nbsp;</label></b>
+     
+      <br><label for="email">Email</label>
+      <input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all">
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password"  class="text ui-widget-content ui-corner-all">
+      <label for="email">Security Question</label>
+      <input type="text" name="secque" id="secque" value="" class="text ui-widget-content ui-corner-all">
+      <label for="email">Answer</label>
+      <input type="text" name="secans" id="secans" value="" class="text ui-widget-content ui-corner-all">
+      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
+  </form>
+</div>
+    <br>
+    <div id="content" style="font-size: 14px;font-family:calibri">
+        <p> Comparing and maintaining proper energy usage is an important constituent 
+
+in the successful economic growth of a country. This especially holds true when 
+
+governments are budgeting funds for their upcoming year or making future projections. 
+
+Our application  provides a reliable and robust foundation upon which our target 
+
+population like environmentalist, economist, Governmental officials, research-affiliated 
+
+organization, and energy engineers will be able to take our visualization to craft future 
+
+projection, make comparison among countries, and reduce, as much as possible, overall 
+
+energy deficit.</p>
+        <p>
+             User will be able to access the Energy Data Analyzer application, utilize
+
+the tabs to retrieve the information in which they requested, and save and/or download 
+
+that information for future use. The information is regarding energy and its use in 
+
+different environments, and they may use the information generated by the analyzer for 
+
+their specific fields whether they are companies or individuals. The user can save the link to the application into 
+
+a bookmark folder on the browser and will always be able to find it.
+        </p>
+    </div>
+ 
+</body>
+</html>
